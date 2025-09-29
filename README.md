@@ -53,5 +53,5 @@ Or, if you've activated the virtual environment with `pipenv shell`:
 jupyter notebook
 ```
 
-The notebook server will open in your browser. Navigate to the `data_frame_exercise/` directory to access the exercise notebooks.
+The notebook server will open in your browser. Navigate to the different directories to access the exercise notebooks for the different exercises.
 
