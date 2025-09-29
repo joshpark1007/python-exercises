@@ -1,0 +1,159 @@
+import sys
+import os
+import pytest
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+from dataframe import DataFrame
+from series import Series
+
+
+class TestDataFrameInit:
+    def test_dataframe_initialization(self):
+        df = DataFrame()
+        assert df._dictionary == {}
+        assert df._list == []
+
+
+class TestDataFrameFromCSV:
+    def test_from_csv_creates_dataframe(self):
+        csv_path = os.path.join(os.path.dirname(__file__), 'test_birds.csv')
+        df = DataFrame.from_csv(csv_path)
+        assert df.shape == (3, 21)  # 3 columns, 21 rows
+        assert 'species' in df.columns
+        assert 'specimen_id' in df.columns
+        assert 'weight' in df.columns
+        assert hasattr(df, 'species')
+        assert hasattr(df, 'specimen_id')
+        assert hasattr(df, 'weight')
+
+
+class TestDataFrameFromRows:
+    def test_from_rows_creates_dataframe(self):
+        rows = [
+            {'name': 'Alice', 'age': '30'},
+            {'name': 'Bob', 'age': '25'}
+        ]
+        df = DataFrame.from_rows(rows)
+        assert len(df.columns) == 2
+        assert 'name' in df.columns
+        assert 'age' in df.columns
+
+    def test_from_rows_creates_attributes(self):
+        rows = [
+            {'Name': 'Alice', 'Age': '30'},
+            {'Name': 'Bob', 'Age': '25'}
+        ]
+        df = DataFrame.from_rows(rows)
+        assert hasattr(df, 'name')
+        assert hasattr(df, 'age')
+
+
+class TestDataFrameFromDictionary:
+    def test_from_dictionary_creates_dataframe(self):
+        data = {
+            'name': ['Alice', 'Bob'],
+            'age': [30, 25]
+        }
+        df = DataFrame.from_dictionary(data)
+        assert len(df.columns) == 2
+        assert df.shape == (2, 2)
+
+
+class TestDataFrameProperties:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.df = DataFrame.from_rows([
+            {'name': 'Alice', 'age': '30'},
+            {'name': 'Bob', 'age': '25'}
+        ])
+
+    def test_shape_property(self):
+        assert self.df.shape == (2, 2)
+
+    def test_columns_property(self):
+        assert len(self.df.columns) == 2
+        assert 'name' in self.df.columns
+
+
+class TestDataFrameGetItem:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.df = DataFrame.from_rows([
+            {'name': 'Alice', 'age': '30'},
+            {'name': 'Bob', 'age': '25'}
+        ])
+
+    def test_getitem_returns_series(self):
+        name_column = self.df['name']
+        assert isinstance(name_column, Series)
+
+    def test_getitem_returns_correct_values(self):
+        name_column = self.df['name']
+        assert 'Alice' in name_column
+        assert 'Bob' in name_column
+
+
+class TestDataFrameSetItem:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.df = DataFrame.from_rows([
+            {'name': 'Alice', 'age': '30'},
+            {'name': 'Bob', 'age': '25'}
+        ])
+
+    def test_setitem_adds_new_column(self):
+        new_series = Series(['Engineer', 'Designer'])
+        self.df['job'] = new_series
+        assert 'job' in self.df.columns
+
+    def test_setitem_creates_attribute(self):
+        new_series = Series(['Engineer', 'Designer'])
+        self.df['Job Title'] = new_series
+        assert hasattr(self.df, 'job_title')
+
+
+class TestDataFrameWhere:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.df = DataFrame.from_rows([
+            {'name': 'Alice', 'age': '30'},
+            {'name': 'Bob', 'age': '25'},
+            {'name': 'Charlie', 'age': '35'}
+        ])
+
+    def test_where_filters_rows(self):
+        filtered = self.df.where(lambda row: int(row['age']) > 27)
+        assert filtered.shape[1] == 2  # 2 rows should match
+
+
+class TestDataFrameAssign:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.df = DataFrame.from_rows([
+            {'name': 'Alice', 'age': '30'},
+            {'name': 'Bob', 'age': '25'}
+        ])
+
+    def test_assign_adds_computed_column(self):
+        result = self.df.assign(age_doubled=lambda row: int(row['age']) * 2)
+        assert 'age_doubled' in result.columns
+
+
+class TestDataFrameGroupBy:
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
+        self.df = DataFrame.from_rows([
+            {'department': 'Engineering', 'salary': '100000'},
+            {'department': 'Engineering', 'salary': '120000'},
+            {'department': 'Sales', 'salary': '80000'}
+        ])
+
+    def test_group_by_creates_groups(self):
+        grouped = self.df.group_by('department')
+        assert 'Engineering' in grouped.keys()
+        assert 'Sales' in grouped.keys()
+
+    def test_group_by_groups_correct_items(self):
+        grouped = self.df.group_by('department')
+        assert len(grouped['Engineering']) == 2
+        assert len(grouped['Sales']) == 1
