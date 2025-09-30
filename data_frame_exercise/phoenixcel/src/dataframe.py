@@ -1,6 +1,6 @@
 import csv
-from .series import Series
-from .groupby import GroupBy
+from phoenixcel.src.series import Series
+from phoenixcel.src.groupby import GroupBy
 
 class DataFrame():
     def __init__(self):
@@ -87,7 +87,7 @@ class DataFrame():
         Modifies:
           Nothing
         '''
-        return self._dictionary[item]
+        return Series(self._dictionary[item])
 
     # Method for setting a column in the dictionary
     def __setitem__(self, key, value):

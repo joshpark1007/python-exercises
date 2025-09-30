@@ -1,10 +1,8 @@
-import sys
 import os
 import pytest
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from dataframe import DataFrame
-from series import Series
+from phoenixcel.src.dataframe import DataFrame
+from phoenixcel.src.series import Series
 
 
 class TestDataFrameInit:
