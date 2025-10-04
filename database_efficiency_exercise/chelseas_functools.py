@@ -646,7 +646,36 @@ def _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
 
     wrapper.cache_info = cache_info
     wrapper.cache_clear = cache_clear
+
+    ################################
+    # THIS IS THE PART CHELSEA ADDED
+    ################################
     wrapper.cache = cache #This is the line Chelsea added
+    
+    def make_cache_legible(orig_cache):
+        from copy import deepcopy
+        legible_cache = deepcopy(orig_cache)
+        for k, v in orig_cache.items():
+            # replace the internal node with something readable
+            # link is [prev, next, key, result]
+            try:
+                prev, nxt, key, result = v
+                legible_cache[k] = [
+                    f"<function called before with {prev[-2]}, giving result {prev[-1]}>", 
+                    f"<function called next with {nxt[-2]}, giving result {nxt[-1]}>", 
+                    key, 
+                    result
+                ]
+            except Exception:
+                legible_cache[k] = "<unreadable entry>"
+        return legible_cache
+
+    # expose as a function to call later
+    wrapper.cache_legible = lambda: make_cache_legible(cache)
+    ################################
+    # END OF THE PART CHELSEA ADDED
+    ################################
+                    
     return wrapper
 
 # Chelsea removed four lines right here that imported an implementation
