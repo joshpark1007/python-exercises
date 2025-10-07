@@ -656,13 +656,19 @@ def _lru_cache_wrapper(user_function, maxsize, typed, _CacheInfo):
         from copy import deepcopy
         legible_cache = deepcopy(orig_cache)
         for k, v in orig_cache.items():
+            
+            def format_call(position, argument, return_val):
+                if argument is None and return_val is None:
+                    return f"<Nothing called {position}>"
+                return f"<function called {position} with {argument}, giving result {return_val}>"
+                
             # replace the internal node with something readable
             # link is [prev, next, key, result]
             try:
                 prev, nxt, key, result = v
                 legible_cache[k] = [
-                    f"<function called before with {prev[-2]}, giving result {prev[-1]}>", 
-                    f"<function called next with {nxt[-2]}, giving result {nxt[-1]}>", 
+                    format_call("previously", prev[-2], prev[-1]),
+                    format_call("next", nxt[-2], nxt[-1]),
                     key, 
                     result
                 ]
