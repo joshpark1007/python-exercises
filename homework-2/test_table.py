@@ -170,7 +170,7 @@ class TestTableIntegration(unittest.TestCase):
         self.assertNotIn("col2", self.table.data)
 
 import sys
-class TestTableIntegration(unittest.TestCase):
+class TestTableMemPerformance(unittest.TestCase):
     def setUp(self):
         self.table = Table()
         self.table.begin_transaction()
