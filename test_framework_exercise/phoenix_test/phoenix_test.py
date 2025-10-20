@@ -1,6 +1,6 @@
 from colorama import Fore, Back, Style
 
-class Test():
+class PhoenixTest():
     types = []
 
     def __init_subclass__(cls, **kwargs):
